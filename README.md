@@ -18,7 +18,7 @@ const functions = require('firebase-functions');
 const admin = require('firebase-admin');
 admin.initializeApp(functions.config().firebase);
 
-const Border = require('./border')
+const Border = require('border-js')
 const border = new Border("v1"); // set model version.
 
 exports.createStripeCustomer = border.createCustomer();
