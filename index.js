@@ -1,6 +1,4 @@
-const functions = require('firebase-functions');
 const admin = require('firebase-admin');
-const stripe = require('stripe')(functions.config().stripe.token);
 const currency = 'JPY';
 
 function userFacingMessage(error) {
@@ -8,12 +6,14 @@ function userFacingMessage(error) {
 }
 
 class Border {
-  constructor(version) {
+  constructor(version, functions) {
     this.version = version;
+    this.function = functions;
+    this.stripe = require('stripe')(functions.config().stripe.token);
   }
 
   cleateStripeCustomer(userID) {
-    return stripe.customers.create()
+    return this.stripe.customers.create()
       .then(customer => {
         return admin.database().ref(`/${this.version}/customer`).push({
           _createdAt: admin.database.ServerValue.TIMESTAMP,
@@ -26,7 +26,7 @@ class Border {
   }
 
   createCustomer() {
-    return functions.https.onRequest((req, res) => {
+    return this.functions.https.onRequest((req, res) => {
       if (req.method != 'POST') { res.status(403).end(); }
       const userID = req.body.userID;
       if (!userID) { res.status(400).end(); }
@@ -36,23 +36,23 @@ class Border {
   }
 
   createCustomerOnAuthUserCreate() {
-    return functions.auth.user().onCreate(event => {
+    return this.functions.auth.user().onCreate(event => {
       const authUser = event.data;
       return this.cleateStripeCustomer(authUser.uid);
     });
   }
 
   cleanupCustomer() {
-    return functions.auth.user().onDelete(event => {
+    return this.functions.auth.user().onDelete(event => {
       const authUser = event.data;
       return admin.database().ref(`/${this.version}/user/${authUser.uid}`).once('value').then(snapshot => snapshot.val())
         .then(user => admin.database().ref(`/${this.version}/customer/${user.customerID}`).once('value').then(snapshot => snapshot.val()))
-        .then(customer => stripe.customers.del(customer.stripeCustomerID));
+        .then(customer => this.stripe.customers.del(customer.stripeCustomerID));
     });
   }
 
   addPaymentSource() {
-    return functions.database.ref(`/${this.version}/source/{sourceID}/token`).onWrite(event => {
+    return this.functions.database.ref(`/${this.version}/source/{sourceID}/token`).onWrite(event => {
       const token = event.data.val();
       const sourceID = event.params.sourceID;
       if (token === null) { return null; }
@@ -60,7 +60,7 @@ class Border {
       return admin.database().ref(`/${this.version}/source/${sourceID}`).once('value').then(snapshot => snapshot.val())
         .then(source => admin.database().ref(`/${this.version}/user/${source.userID}`).once('value').then(snapshot => snapshot.val()))
         .then(user => admin.database().ref(`/${this.version}/customer/${user.customerID}`).once('value').then(snapshot => snapshot.val()))
-        .then(customer => stripe.customers.createSource(customer.stripeCustomerID, {source: token}))
+        .then(customer => this.stripe.customers.createSource(customer.stripeCustomerID, {source: token}))
         .then(response => {
           return event.data.adminRef.parent.update({
             cardID: response.id,
@@ -84,7 +84,7 @@ class Border {
   }
 
   createStripeCharge() {
-    return functions.database.ref(`/${this.version}/charge/{chargeID}`).onWrite(event => {
+    return this.functions.database.ref(`/${this.version}/charge/{chargeID}`).onWrite(event => {
       const charge = event.data.val();
       const customerID = charge.customerID;
 
@@ -108,7 +108,7 @@ class Border {
         })
         .then(chargeJSON => {
           const idempotencyKey = event.params.chargeID;
-          return stripe.charges.create(chargeJSON, {idempotency_key: idempotencyKey});
+          return this.stripe.charges.create(chargeJSON, {idempotency_key: idempotencyKey});
         }).then(response => {
           console.log(response);
         }, error => {
