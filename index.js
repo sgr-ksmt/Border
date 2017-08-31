@@ -8,7 +8,7 @@ function userFacingMessage(error) {
 class Border {
   constructor(version, functions) {
     this.version = version;
-    this.function = functions;
+    this.functions = functions;
     this.stripe = require('stripe')(functions.config().stripe.token);
   }
 
