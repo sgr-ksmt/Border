@@ -1,0 +1,30 @@
+{
+  "name": "border",
+  "version": "1.0.0",
+  "description": "Border is CloudFunction libarry that connect Firebase and Stripe.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/sgr-ksmt/Border.git"
+  },
+  "keywords": [
+    "Stripe",
+    "Firebase",
+    "CloudFunction"
+  ],
+  "author": "sgr-ksmt",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/sgr-ksmt/Border/issues"
+  },
+  "homepage": "https://github.com/sgr-ksmt/Border#readme",
+  "dependencies": {
+    "firebase-admin": "~4.2.1",
+    "firebase-functions": "^0.6.2",
+    "stripe": "^4.24.1"
+  },
+  "private": false
+}
