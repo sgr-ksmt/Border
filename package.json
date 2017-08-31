@@ -1,5 +1,5 @@
 {
-  "name": "border",
+  "name": "border-js",
   "version": "1.0.0",
   "description": "Border is CloudFunction libarry that connect Firebase and Stripe.",
   "main": "index.js",

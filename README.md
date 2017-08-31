@@ -7,7 +7,7 @@ Border is CloudFunction libarry that connect Firebase and Stripe.
 - Charge amount using specified card.
 
 ## Install
-`$ npm install border`
+`$ npm install border-js`
 
 ## Usage
 - Add your [Stripe API Secret Key](https://dashboard.stripe.com/account/apikeys) to firebase config:  
