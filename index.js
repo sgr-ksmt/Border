@@ -12,7 +12,7 @@ class Border {
     this.stripe = require('stripe')(functions.config().stripe.token);
   }
 
-  cleateStripeCustomer(userID) {
+  createStripeCustomer(userID) {
     return this.stripe.customers.create()
       .then(customer => {
         return admin.database().ref(`/${this.version}/customer`).push({
@@ -30,7 +30,7 @@ class Border {
       if (req.method != 'POST') { res.status(403).end(); }
       const userID = req.body.userID;
       if (!userID) { res.status(400).end(); }
-      this.cleateStripeCustomer(userID)
+      this.createStripeCustomer(userID)
         .then(() => { res.status(200).send({result: true}); });
     });
   }
@@ -38,7 +38,7 @@ class Border {
   createCustomerOnAuthUserCreate() {
     return this.functions.auth.user().onCreate(event => {
       const authUser = event.data;
-      return this.cleateStripeCustomer(authUser.uid);
+      return this.createStripeCustomer(authUser.uid);
     });
   }
 
